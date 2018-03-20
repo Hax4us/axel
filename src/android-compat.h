@@ -41,10 +41,22 @@ int pthread_cancel(pthread_t h) {
 	return pthread_kill(h, 0);
 }
 
-inline static
-int pthread_setcancelstate(int state, int *oldstate)
+static void thread_cancel_handler(int sig_num)
 {
-	return 0;
+	if (sig_num == SIGUSR1)
+	{
+		pthread_exit(0);
+	}
+}
+
+static int pthread_setcancelstate(int state, int *oldstate)
+{
+	struct sigaction action;
+	memset(&action, 0, sizeof(action));
+	sigemptyset(&action.sa_mask);
+	action.sa_flags = 0;
+	action.sa_handler = &thread_cancel_signal_handler;	
+	return sigaction(SIGUSR1, &action, NULL);
 }
 
 inline static
@@ -52,12 +64,4 @@ int pthread_setcanceltype(int type, int *oldtype)
 {
 	return 0;
 }
-
-enum {
-	PTHREAD_CANCEL_DISABLE,
-	PTHREAD_CANCEL_ENABLE,
-	PTHREAD_CANCEL_DEFERRED,
-	PTHREAD_CANCEL_ASYNCHRONOUS,
-};
-
 #endif /* !defined(AXEL_COMPAT_ANDROID) && defined(__ANDROID__) */
