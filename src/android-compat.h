@@ -49,7 +49,7 @@ static void thread_cancel_handler(int sig_num)
 	}
 }
 
-static int pthread_setcancelstate(int state, int *oldstate)
+static int pthread_setcancelable()
 {
 	struct sigaction action;
 	memset(&action, 0, sizeof(action));
